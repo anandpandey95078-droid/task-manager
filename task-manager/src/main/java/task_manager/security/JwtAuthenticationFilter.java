@@ -20,7 +20,6 @@ public class JwtAuthenticationFilter
     private final JwtUtil jwtUtil;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
-
         this.jwtUtil = jwtUtil;
     }
 
@@ -31,9 +30,21 @@ public class JwtAuthenticationFilter
             FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Login and Register don't need JWT
+        String path = request.getServletPath();
+
+        if (path.equals("/auth/login")
+                || path.equals("/auth/register")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Get Authorization header
         String authHeader =
                 request.getHeader("Authorization");
 
+        // If token is not present
         if (authHeader == null ||
                 !authHeader.startsWith("Bearer ")) {
 
@@ -41,14 +52,17 @@ public class JwtAuthenticationFilter
             return;
         }
 
+        // Remove "Bearer " from token
         String token =
                 authHeader.substring(7);
 
         try {
 
+            // Extract email from JWT
             String email =
                     jwtUtil.extractEmail(token);
 
+            // Create authentication object
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             email,
@@ -56,6 +70,7 @@ public class JwtAuthenticationFilter
                             Collections.emptyList()
                     );
 
+            // Store authentication in SecurityContext
             SecurityContextHolder
                     .getContext()
                     .setAuthentication(authentication);
@@ -63,8 +78,10 @@ public class JwtAuthenticationFilter
         } catch (Exception e) {
 
             System.out.println("Invalid JWT token");
+
         }
 
+        // Continue request
         filterChain.doFilter(request, response);
     }
 }

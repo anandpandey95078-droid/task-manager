@@ -1,5 +1,6 @@
 package task_manager.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import task_manager.entity.User;
@@ -15,13 +16,17 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
 
+	private PasswordEncoder passwordEncoder;
+
     public AuthService(
             UserRepository userRepository,
-            JwtUtil jwtUtil) {
+            JwtUtil jwtUtil,PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
 
         this.jwtUtil = jwtUtil;
+        
+        this.passwordEncoder=passwordEncoder;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -30,10 +35,13 @@ public class AuthService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
-
-        if (!user.getPassword().equals(request.getPassword())) {
+        
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
 
             throw new RuntimeException("Invalid password");
+        
         }
 
         String token =
