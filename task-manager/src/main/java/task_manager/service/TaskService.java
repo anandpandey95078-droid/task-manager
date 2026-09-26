@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+
 import task_manager.entity.Task;
+import task_manager.exception.ResourceNotFoundException;
 import task_manager.repository.TaskRepository;
 import task_manager.requestdto.TaskRequest;
 import task_manager.responsedto.TaskResponse;
@@ -41,7 +43,9 @@ public class TaskService {
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Task not found with id: " + id)
+                        new ResourceNotFoundException(
+                                "Task not found with id: " + id
+                        )
                 );
 
         return mapToResponse(task);
@@ -51,7 +55,9 @@ public class TaskService {
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Task not found with id: " + id)
+                        new ResourceNotFoundException(
+                                "Task not found with id: " + id
+                        )
                 );
 
         task.setTitle(request.getTitle());
@@ -66,7 +72,9 @@ public class TaskService {
     public void deleteTask(Long id) {
 
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Task not found with id: " + id);
+            throw new ResourceNotFoundException(
+                    "Task not found with id: " + id
+            );
         }
 
         taskRepository.deleteById(id);
