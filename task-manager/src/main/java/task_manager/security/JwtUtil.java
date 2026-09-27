@@ -16,10 +16,11 @@ public class JwtUtil {
     private final SecretKey key =
             Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email,String role) {
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role",role)
                 .issuedAt(new Date())
                 .expiration(
                         new Date(System.currentTimeMillis() + 86400000)
@@ -36,5 +37,14 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+    public String extractRole(String token) {
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
     }
 }

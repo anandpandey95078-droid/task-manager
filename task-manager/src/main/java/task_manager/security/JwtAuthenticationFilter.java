@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -61,13 +62,17 @@ public class JwtAuthenticationFilter
             // Extract email from JWT
             String email =
                     jwtUtil.extractEmail(token);
+            String role=
+            		jwtUtil.extractRole(token);
 
             // Create authentication object
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.emptyList()
+                            Collections.singletonList(
+                            		new SimpleGrantedAuthority("Role_"+role)
+                            		)
                     );
 
             // Store authentication in SecurityContext

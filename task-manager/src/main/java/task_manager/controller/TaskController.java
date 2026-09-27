@@ -68,4 +68,8 @@ public class TaskController {
 
         return ResponseEntity.ok("Task deleted successfully");
     }
+    @GetMapping("/admin-test")
+    public String adminTest() {
+        return "Welcome Admin!";
+    }
 }
